@@ -1,14 +1,10 @@
 package ch.educatech;
 
-public class Video {
+import org.springframework.data.annotation.Id;
 
+public class Video {
+	@Id
     private String id;
-    private String img;
-    private String numberOfPlays;
-    private String isCatchUp;
-    private String homesection;
-    private String preview_image_url;
-    private String durationS;
     private String streams;
     private String category;
     private String title;
@@ -16,9 +12,20 @@ public class Video {
     private String duration;
     private String fullLength;
     private String publishedDate;
-    private String thumbnail;
-    private String program;
+    private String img;
     private String url;
+    private String thumbnail;
+    private String numberOfPlays;
+    private String isCatchUp;
+    private String homesection;
+    private String preview_image_url;
+    private String durationS;
+    private String streams_hds;
+    private String streams_hds_sd;
+    private String streams_hls;
+    private String streams_hls_sd;
+    private String program;
+    private boolean pedagogic;
     
     
     
@@ -307,6 +314,77 @@ public class Video {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+
+
+
+
+	public boolean isPedagogic() {
+		return pedagogic;
+	}
+
+
+
+
+	public void setPedagogic(boolean pedagogic) {
+		this.pedagogic = pedagogic;
+	}
+
+
+
+
+	public String getStreams_hds() {
+		return streams_hds;
+	}
+
+
+
+
+	public String getStreams_hds_sd() {
+		return streams_hds_sd;
+	}
+
+
+
+
+	public String getStreams_hls() {
+		return streams_hls;
+	}
+
+
+
+
+	public String getStreams_hls_sd() {
+		return streams_hls_sd;
+	}
+
+
+
+
+	public void setStreams_hds(String streams_hds) {
+		this.streams_hds = streams_hds;
+	}
+
+
+
+
+	public void setStreams_hds_sd(String streams_hds_sd) {
+		this.streams_hds_sd = streams_hds_sd;
+	}
+
+
+
+
+	public void setStreams_hls(String streams_hls) {
+		this.streams_hls = streams_hls;
+	}
+
+
+
+
+	public void setStreams_hls_sd(String streams_hls_sd) {
+		this.streams_hls_sd = streams_hls_sd;
+	}
+	
 
     
 }
