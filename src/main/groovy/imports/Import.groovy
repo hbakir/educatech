@@ -9,12 +9,8 @@ import com.mongodb.WriteConcern
 import groovyx.net.http.RESTClient
 
 def client = new RESTClient("http://www.rts.ch/")
-
-def listParams = [path: "http://www.rts.ch/decouverte/monde-et-societe/histoire/?f=json/list&v=1.1"]
-def listResponse = client.get(listParams)
-
-println "videos count = " + listResponse.responseData.count
-
+def srgssrclient = new RESTClient("http://il.srgssr.ch/")
+def categories = ["histoire", "science", "geographie", "math", "arts", "musique", "litterature"]
 String mongoUri = System.getenv("MONGOLAB_URI");
 
 if (mongoUri == null || "".equals(mongoUri)) {
@@ -32,52 +28,74 @@ try {
 
 DB db = mongoClient.getDB(dbName)
 DBCollection collection = db.getCollection("educatech")
+collection.drop()
 
-for(video in listResponse.responseData.list) {
+for (category in categories) {
 
-    println video.id + " " + video.title
+// def listParams = [path: "http://www.rts.ch/decouverte/monde-et-societe/histoire/?f=json/list&v=1.1"]
 
-    def videoDetailsParams = [path: "http://www.rts.ch/a/" + video.id + ".html?f=json/article&v=1.1"]
-    def videoDetailsResponse = client.get(videoDetailsParams)
+    def listParams = [path: "http://il.srgssr.ch/integrationlayer/1.0/ue/rts/video/search.json?q=" + category + "&pageSize=100&pageNumber=1"]
 
-    def vignetteAttachment = videoDetailsResponse.responseData["related-content"].vignetteAttachment
-    println vignetteAttachment.title
+    def listResponse = srgssrclient.get(listParams)
+    def searchResults = listResponse.responseData.SearchResults
 
-    video.numberOfPlays = videoDetailsResponse.responseData.numberOfPlays
-    video.isCatchUp = videoDetailsResponse.responseData.isCatchUp
-    video.homesection = videoDetailsResponse.responseData.homesection
-    video.preview_image_url = videoDetailsResponse.responseData.preview_image_url
-    video.durationS = videoDetailsResponse.responseData.durationS
-    video.streams = videoDetailsResponse.responseData.streams
+    println "videos count = " + searchResults["@total"]
 
-    BasicDBObject videoObject = new BasicDBObject("id", video.id)
-    videoObject.append("title", video.title)
-    videoObject.append("intro", video.intro)
-    videoObject.append("url", video.url)
-    videoObject.append("img", video.img)
-    videoObject.append("creation", video.creation)
-    videoObject.append("publication", video.publication)
-    videoObject.append("expiration", video.expiration)
-    videoObject.append("modification", video.modification)
-    videoObject.append("program", video.program)
-    videoObject.append("channel", video.channel)
-    videoObject.append("plays", video.plays)
-    videoObject.append("title", video.title)
-    videoObject.append("isPlayable", video.isPlayable)
-    videoObject.append("numberOfPlays", video.numberOfPlays)
-    videoObject.append("isCatchUp", video.isCatchUp)
-    videoObject.append("preview_image_url", video.preview_image_url)
-    videoObject.append("durationS", video.durationS)
-    videoObject.append("isCatchUp", video.isCatchUp)
-    videoObject.append("isCatchUp", video.isCatchUp)
+    for (video in searchResults.SearchResult) {
 
-    try {
-        collection.insert(videoObject, WriteConcern.SAFE);
-    } catch (Exception e) {
-        System.out.println("threw an exception: " + e.getClass() + " :: "
-                + e.getMessage());
+        println video.id + " " + video.urn + " " + video.title
+
+        def videoDetailsParams = [path: "http://www.rts.ch/a/" + video.id + ".html?f=json/article&v=1.1"]
+        def videoDetailsResponse = client.get(videoDetailsParams)
+
+        def vignetteAttachment = videoDetailsResponse.responseData["related-content"].vignetteAttachment
+        println vignetteAttachment.title
+
+        def parentBroadcastAttachment = videoDetailsResponse.responseData["related-content"].parentBroadcastAttachment
+        println "program = " + parentBroadcastAttachment.program
+
+        video.numberOfPlays = videoDetailsResponse.responseData.numberOfPlays
+        video.url = videoDetailsResponse.responseData.url
+        video.isCatchUp = videoDetailsResponse.responseData.isCatchUp
+        video.homesection = videoDetailsResponse.responseData.homesection
+        video.preview_image_url = videoDetailsResponse.responseData.preview_image_url
+        video.durationS = videoDetailsResponse.responseData.durationS
+        video.streams = videoDetailsResponse.responseData.streams
+        video.program = parentBroadcastAttachment.program
+
+        BasicDBObject videoObject = new BasicDBObject("_id", video.id)
+
+        videoObject.append("category", category)
+        videoObject.append("id", video.id)
+        videoObject.append("title", video.title)
+        videoObject.append("description", video.description)
+        videoObject.append("duration", video.duration)
+        videoObject.append("fullLength", video.fullLength)
+        videoObject.append("publishedDate", video.publishedDate)
+        videoObject.append("img", video.img)
+        videoObject.append("url", video.url)
+
+        videoObject.append("thumbnail", vignetteAttachment.thumbnail[0])
+        videoObject.append("numberOfPlays", video.numberOfPlays)
+        videoObject.append("isCatchUp", video.isCatchUp)
+        videoObject.append("homesection", video.homesection)
+        videoObject.append("preview_image_url", video.preview_image_url)
+        videoObject.append("durationS", video.durationS)
+        videoObject.append("streams_hds", video.streams.hds)
+        videoObject.append("streams_hds_sd", video.streams.hds_sd)
+        videoObject.append("streams_hls", video.streams.hls)
+        videoObject.append("streams_hls_sd", video.streams.hls_sd)
+        videoObject.append("program", video.program[0])
+        videoObject.append("pedagogic", false)
+
+        try {
+            collection.insert(videoObject, WriteConcern.SAFE);
+        } catch (Exception e) {
+            println "threw an exception: " + e.getClass() + " :: "
+            +e.getMessage()
+        }
+
     }
-
 }
 
 
