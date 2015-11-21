@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id;
 public class Video {
 	@Id
     private String id;
-    private String streams;
     private String category;
     private String title;
     private String description;
@@ -25,7 +24,7 @@ public class Video {
     private String streams_hls;
     private String streams_hls_sd;
     private String program;
-    private boolean pedagogic;
+    private boolean pedagogic=false;
     
     
     
@@ -67,7 +66,6 @@ public class Video {
 	this.homesection = homesection;
 	this.preview_image_url = preview_image_url;
 	this.durationS = durationS;
-	this.streams = streams;
 	this.category = category;
 	this.title = title;
 	this.description = description;
@@ -124,13 +122,6 @@ public class Video {
 
 	public String getDurationS() {
 		return durationS;
-	}
-
-
-
-
-	public String getStreams() {
-		return streams;
 	}
 
 
@@ -230,14 +221,6 @@ public class Video {
 	public void setDurationS(String durationS) {
 		this.durationS = durationS;
 	}
-
-
-
-
-	public void setStreams(String streams) {
-		this.streams = streams;
-	}
-
 
 
 

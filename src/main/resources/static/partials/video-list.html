@@ -18,7 +18,10 @@
         <li ng-repeat="video in videos | filter:query | orderBy:orderProp" class="thumbnail">
           <a href="{{video.url}}" class="thumb"><img ng-src="{{video.img}}"></a>
           <a href="{{video.url}}">{{video.title}}</a>
+          <label>
+              <input type="checkbox" /> pedagogic ? </label>
           <p>{{video.description}}</p>
+          
         </li>
       </ul>
 
